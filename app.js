@@ -1,7 +1,7 @@
 const {buildDB} = require('./db/populateDataBase')
-
+const { db} = require('./db/')
 const express = require('express')
-const { Cheese } = require('./models')
+const { Cheese, User } = require('./models')
 const app = express()
 
 buildDB()
@@ -56,6 +56,36 @@ app.get('/two-cheeses/', async (req, res) => {
     }
 })
 
+
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+
+app.post("/cheeses/", async (req,res) => {
+    await Cheese.create(req.body)
+    const allCheeses = await Cheese.findAll()
+    res.send(allCheeses)
+})
+
+app.put("/cheeses/:id", async (req,res) => {
+    const cheeseId = req.params.id
+    const updatedCheeses = await Cheese.update(
+        req.body,
+        {where: {"id": cheeseId}}
+    )
+
+    const allCheeses = await Cheese.findAll()
+    res.send(allCheeses)
+})
+
+app.delete("/cheeses/:id", async (req,res) => {
+    const cheeseId = req.params.id
+    const deletedCheeses = await Cheese.destroy(
+        {where: {"id": cheeseId}}
+    )
+
+    const allCheeses = await Cheese.findAll()
+    res.send(allCheeses)
+})
 
 const port = 3000
 app.listen(port, () => {
